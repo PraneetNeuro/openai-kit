@@ -1,21 +1,21 @@
 import Foundation
 
 /**
- Given a prompt, the model will return one or more predicted chat completions, and can also return the probabilities of alternative tokens at each position.
+ Given a prompt, the model will return one or more predicted chat comppublic letions, and can also return the probabilities of alternative tokens at each position.
  */
 public struct Chat: Codable {
-    let id, object: String
-    let created: Int
-    let model: String
-    let choices: [Choice]
-    let usage: Usage
+    public let id, object: String
+    public let created: Int
+    public let model: String
+    public let choices: [Choice]
+    public let usage: Usage
 }
 
 // MARK: - Choice
 public struct Choice: Codable {
-    let index: Int
-    let message: ChatMessage
-    let finishReason: String?
+    public let index: Int
+    public let message: ChatMessage
+    public let finishReason: String?
 
     enum CodingKeys: String, CodingKey {
         case index, message
@@ -32,9 +32,9 @@ public enum Role: String, Codable {
 
 // MARK: - Message
 public struct ChatMessage: Codable {
-    let role: Role
-    let content: String
-    let functionCall: FunctionCall?
+    public let role: Role
+    public let content: String
+    public let functionCall: FunctionCall?
     
     init(role: Role, content: String) {
         self.role = role
@@ -50,5 +50,5 @@ public struct ChatMessage: Codable {
 
 // MARK: - FunctionCall
 public struct FunctionCall: Codable {
-    let name, arguments: String
+    public let name, arguments: String
 }
