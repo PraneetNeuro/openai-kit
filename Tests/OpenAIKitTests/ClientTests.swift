@@ -46,9 +46,9 @@ final class ClientTests: XCTestCase {
     }
     
     func test_gpt4Completion() async throws {
-        let messages: [Chat.Message] = [
-            .system(content: "You are a fairytale storyteller. Create a fairytale about the subject in the next message."),
-            .user(content: "a happy wolf in the forrest")
+        let messages: [ChatMessage] = [
+            .init(role: .system, content: "You are a fairytale storyteller. Create a fairytale about the subject in the next message."),
+            .init(role: .user, content: "a happy wolf in the forrest")
         ]
         
         let completion = try await client.chats.create(
@@ -72,7 +72,7 @@ final class ClientTests: XCTestCase {
         let completion = try await client.chats.create(
             model: Model.GPT3.gpt3_5Turbo,
             messages: [
-                .user(content: "Write a haiki")
+                .init(role: .user, content: "Write a haiki")
             ]
         )
         
@@ -83,7 +83,7 @@ final class ClientTests: XCTestCase {
         let stream = try await client.chats.stream(
             model: Model.GPT3.gpt3_5Turbo,
             messages: [
-                .user(content: "Write a haiki")
+                .init(role: .user, content: "Write a haiki")
             ]
         )
         

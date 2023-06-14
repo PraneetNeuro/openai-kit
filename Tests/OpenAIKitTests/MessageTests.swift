@@ -60,32 +60,32 @@ final class MessageTests: XCTestCase {
         let messageData = """
             {"role": "user", "content": "Translate the following English text to French: "}
             """.data(using: .utf8)!
-        let message = try decoder.decode(Chat.Message.self, from: messageData)
-        switch message {
-        case .system(_):
+        let message = try decoder.decode(ChatMessage.self, from: messageData)
+        switch message.role {
+        case .system:
             XCTFail("incorrect role")
-        case .user(let content):
-            XCTAssertEqual(content, "Translate the following English text to French: ")
-        case .assistant(_):
+        case .user:
+            XCTAssertEqual(message.content, "Translate the following English text to French: ")
+        case .assistant:
+            XCTFail("incorrect role")
+        case .function:
             XCTFail("incorrect role")
         }
     }
 
     func testMessageRoundtrip() throws {
-        let message = Chat.Message.system(content: "You are a helpful assistant that translates English to French.")
+        let message = ChatMessage(role: .system, content: "You are a helpful assistant that translates English to French.")
         let encoded = try encoder.encode(message)
-        let decoded = try decoder.decode(Chat.Message.self, from: encoded)
+        let decoded = try decoder.decode(ChatMessage.self, from: encoded)
         print(String(data: encoded, encoding: .utf8)!)
-        switch decoded {
-        case .system(let content):
-            guard case let .system(content: original) = message else {
-                XCTFail()
-                return
-            }
-            XCTAssertEqual(content, original)
-        case .user(_):
+        switch decoded.role {
+        case .system:
+            XCTAssert(true)
+        case .user:
             XCTFail("incorrect role")
-        case .assistant(_):
+        case .assistant:
+            XCTFail("incorrect role")
+        case .function:
             XCTFail("incorrect role")
         }
     }
@@ -119,12 +119,14 @@ final class MessageTests: XCTestCase {
         XCTAssertEqual(chat.choices.count, 1)
         let firstChoice = chat.choices.first!
         XCTAssertEqual(firstChoice.index, 0)
-        switch firstChoice.message {
-        case .system(_):
+        switch firstChoice.message.role {
+        case .system:
             XCTFail()
-        case .assistant(let content):
-            XCTAssertEqual(content, "The 2020 World Series was played in Arlington, Texas at the Globe Life Field, which was the new home stadium for the Texas Rangers.")
-        case .user(_):
+        case .assistant:
+            XCTAssertEqual(firstChoice.message.content, "The 2020 World Series was played in Arlington, Texas at the Globe Life Field, which was the new home stadium for the Texas Rangers.")
+        case .user:
+            XCTFail()
+        case .function:
             XCTFail()
         }
     }
@@ -133,9 +135,11 @@ final class MessageTests: XCTestCase {
         let request = try CreateChatRequest(
             model: "gpt-3.5-turbo", //.gpt3_5Turbo,
             messages: [
-                .system(content: "You are Malcolm Tucker from The Thick of It, an unfriendly assistant for writing mail and explaining science and history. You write text in your voice for me."),
-                .user(content: "tell me a joke"),
+                .init(role: .system, content: "You are Malcolm Tucker from The Thick of It, an unfriendly assistant for writing mail and explaining science and history. You write text in your voice for me."),
+                .init(role: .user, content: "tell me a joke"),
             ],
+            functions: [],
+            functionCall: "auto",
             temperature: 1.0,
             topP: 1.0,
             n: 1,

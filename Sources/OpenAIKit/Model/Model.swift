@@ -1,7 +1,7 @@
 import Foundation
 
 /**
- List and describe the various models available in the API. 
+ List and describe the various models available in the API.
  */
 public struct Model: Codable {
     public let id: String
@@ -37,6 +37,7 @@ public protocol ModelID {
 extension Model {
     public enum GPT4: String, ModelID {
         case gpt4 = "gpt-4"
+        case gpt40613 = "gpt-4-0613"
         case gpt40314 = "gpt-4-0314"
         case gpt4_32k = "gpt-4-32k"
         case gpt4_32k0314 = "gpt-4-32k-0314"
@@ -44,6 +45,7 @@ extension Model {
     
     public enum GPT3: String, ModelID {
         case gpt3_5Turbo = "gpt-3.5-turbo"
+        case gpt3_5Turbo0613 = "gpt-3.5-turbo-0613"
         case gpt3_5Turbo0301 = "gpt-3.5-turbo-0301"
         case textDavinci003 = "text-davinci-003"
         case textDavinci002 = "text-davinci-002"

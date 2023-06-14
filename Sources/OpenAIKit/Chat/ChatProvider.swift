@@ -1,3 +1,5 @@
+import AnyCodable
+
 public struct ChatProvider {
     
     private let requestHandler: RequestHandler
@@ -16,7 +18,9 @@ public struct ChatProvider {
      */
     public func create(
         model: ModelID,
-        messages: [Chat.Message] = [],
+        messages: [ChatMessage] = [],
+        functions: [[String: AnyEncodable]] = [],
+        functionCall: String = "auto",
         temperature: Double = 1.0,
         topP: Double = 1.0,
         n: Int = 1,
@@ -31,6 +35,8 @@ public struct ChatProvider {
         let request = try CreateChatRequest(
             model: model.id,
             messages: messages,
+            functions: functions,
+            functionCall: functionCall,
             temperature: temperature,
             topP: topP,
             n: n,
@@ -62,7 +68,9 @@ public struct ChatProvider {
      */
     public func stream(
         model: ModelID,
-        messages: [Chat.Message] = [],
+        messages: [ChatMessage] = [],
+        functions: [[String: AnyEncodable]] = [],
+        functionCall: String = "auto",
         temperature: Double = 1.0,
         topP: Double = 1.0,
         n: Int = 1,
@@ -77,6 +85,8 @@ public struct ChatProvider {
         let request = try CreateChatRequest(
             model: model.id,
             messages: messages,
+            functions: functions,
+            functionCall: functionCall,
             temperature: temperature,
             topP: topP,
             n: n,

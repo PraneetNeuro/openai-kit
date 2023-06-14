@@ -1,6 +1,7 @@
 import AsyncHTTPClient
 import NIOHTTP1
 import Foundation
+import AnyCodable
 
 struct CreateChatRequest: Request {
     let method: HTTPMethod = .POST
@@ -9,7 +10,9 @@ struct CreateChatRequest: Request {
     
     init(
         model: String,
-        messages: [Chat.Message],
+        messages: [ChatMessage],
+        functions: [[String: AnyEncodable]],
+        functionCall: String,
         temperature: Double,
         topP: Double,
         n: Int,
@@ -25,6 +28,8 @@ struct CreateChatRequest: Request {
         let body = Body(
             model: model,
             messages: messages,
+            functions: functions,
+            functionCall: functionCall,
             temperature: temperature,
             topP: topP,
             n: n,
@@ -44,7 +49,9 @@ struct CreateChatRequest: Request {
 extension CreateChatRequest {
     struct Body: Encodable {
         let model: String
-        let messages: [Chat.Message]
+        let messages: [ChatMessage]
+        let functions: [[String: AnyEncodable]]
+        let functionCall: String
         let temperature: Double
         let topP: Double
         let n: Int
@@ -59,6 +66,8 @@ extension CreateChatRequest {
         enum CodingKeys: CodingKey {
             case model
             case messages
+            case functions
+            case functionCall
             case temperature
             case topP
             case n
@@ -78,6 +87,9 @@ extension CreateChatRequest {
             if !messages.isEmpty {
                 try container.encode(messages, forKey: .messages)
             }
+            
+            try container.encodeIfPresent(functions, forKey: .functions)
+            try container.encode(functionCall, forKey: .functionCall)
 
             try container.encode(temperature, forKey: .temperature)
             try container.encode(topP, forKey: .topP)

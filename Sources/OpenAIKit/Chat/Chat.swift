@@ -3,87 +3,52 @@ import Foundation
 /**
  Given a prompt, the model will return one or more predicted chat completions, and can also return the probabilities of alternative tokens at each position.
  */
-public struct Chat {
-    public let id: String
-    public let object: String
-    public let created: Date
-    public let model: String
-    public let choices: [Choice]
-    public let usage: Usage
+public struct Chat: Codable {
+    let id, object: String
+    let created: Int
+    let model: String
+    let choices: [Choice]
+    let usage: Usage
 }
 
-extension Chat: Codable {}
+// MARK: - Choice
+public struct Choice: Codable {
+    let index: Int
+    let message: ChatMessage
+    let finishReason: String?
 
-extension Chat {
-    public struct Choice {
-        public let index: Int
-        public let message: Message
-        public let finishReason: FinishReason?
-    }
-}
-
-extension Chat.Choice: Codable {}
-
-extension Chat {
-    public enum Message {
-        case system(content: String)
-        case user(content: String)
-        case assistant(content: String)
+    enum CodingKeys: String, CodingKey {
+        case index, message
+        case finishReason = "finish_reason"
     }
 }
 
-extension Chat.Message: Codable {
-    private enum CodingKeys: String, CodingKey {
-        case role
-        case content
+public enum Role: String, Codable {
+    case system
+    case assistant
+    case user
+    case function
+}
+
+// MARK: - Message
+public struct ChatMessage: Codable {
+    let role: Role
+    let content: String
+    let functionCall: FunctionCall?
+    
+    init(role: Role, content: String) {
+        self.role = role
+        self.content = content
+        self.functionCall = nil
     }
 
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        let role = try container.decode(String.self, forKey: .role)
-        let content = try container.decode(String.self, forKey: .content)
-        switch role {
-        case "system":
-            self = .system(content: content)
-        case "user":
-            self = .user(content: content)
-        case "assistant":
-            self = .assistant(content: content)
-        default:
-            throw DecodingError.dataCorruptedError(forKey: .role, in: container, debugDescription: "Invalid type")
-        }
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        switch self {
-        case .system(let content):
-            try container.encode("system", forKey: .role)
-            try container.encode(content, forKey: .content)
-        case .user(let content):
-            try container.encode("user", forKey: .role)
-            try container.encode(content, forKey: .content)
-        case .assistant(let content):
-            try container.encode("assistant", forKey: .role)
-            try container.encode(content, forKey: .content)
-        }
+    enum CodingKeys: String, CodingKey {
+        case role, content
+        case functionCall = "function_call"
     }
 }
 
-extension Chat.Message {
-    public var content: String {
-        get {
-            switch self {
-            case .system(let content), .user(let content), .assistant(let content):
-                return content
-            }
-        }
-        set {
-            switch self {
-            case .system: self = .system(content: newValue)
-            case .user: self = .user(content: newValue)
-            case .assistant: self = .assistant(content: newValue)
-            }
-        }
-    }
+// MARK: - FunctionCall
+public struct FunctionCall: Codable {
+    let name, arguments: String
 }
