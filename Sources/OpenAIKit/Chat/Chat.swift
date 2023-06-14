@@ -33,7 +33,7 @@ public enum Role: String, Codable {
 // MARK: - Message
 public struct ChatMessage: Codable {
     public let role: Role
-    public let content: String
+    public let content: String?
     public let functionCall: FunctionCall?
     
     public init(role: Role, content: String) {

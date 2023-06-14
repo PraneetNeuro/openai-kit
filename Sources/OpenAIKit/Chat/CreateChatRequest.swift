@@ -25,11 +25,9 @@ struct CreateChatRequest: Request {
         user: String?
     ) throws {
         
-        let body = Body(
+        var body = Body(
             model: model,
             messages: messages,
-            functions: functions,
-            functionCall: functionCall,
             temperature: temperature,
             topP: topP,
             n: n,
@@ -41,6 +39,11 @@ struct CreateChatRequest: Request {
             logitBias: logitBias,
             user: user
         )
+        
+        if !functions.isEmpty && String(model.split(separator: "-").last!) == "0613" {
+            body.functions = functions
+            body.functionCall = functionCall
+        }
                 
         self.body = try Self.encoder.encode(body)
     }
@@ -50,8 +53,8 @@ extension CreateChatRequest {
     struct Body: Encodable {
         let model: String
         let messages: [ChatMessage]
-        let functions: [[String: AnyEncodable]]
-        let functionCall: String
+        var functions: [[String: AnyEncodable]]?
+        var functionCall: String?
         let temperature: Double
         let topP: Double
         let n: Int
@@ -62,6 +65,21 @@ extension CreateChatRequest {
         let frequencyPenalty: Double
         let logitBias: [String: Int]
         let user: String?
+        
+        init(model: String, messages: [ChatMessage], temperature: Double, topP: Double, n: Int, stream: Bool, stops: [String], maxTokens: Int?, presencePenalty: Double, frequencyPenalty: Double, logitBias: [String : Int], user: String?) {
+            self.model = model
+            self.messages = messages
+            self.temperature = temperature
+            self.topP = topP
+            self.n = n
+            self.stream = stream
+            self.stops = stops
+            self.maxTokens = maxTokens
+            self.presencePenalty = presencePenalty
+            self.frequencyPenalty = frequencyPenalty
+            self.logitBias = logitBias
+            self.user = user
+        }
             
         enum CodingKeys: CodingKey {
             case model
@@ -88,8 +106,10 @@ extension CreateChatRequest {
                 try container.encode(messages, forKey: .messages)
             }
             
-            try container.encodeIfPresent(functions, forKey: .functions)
-            try container.encode(functionCall, forKey: .functionCall)
+            if !(functions?.isEmpty ?? true) && String(model.split(separator: "-").last!) == "0613" {
+                try container.encodeIfPresent(functions, forKey: .functions)
+                try container.encode(functionCall, forKey: .functionCall)
+            }
 
             try container.encode(temperature, forKey: .temperature)
             try container.encode(topP, forKey: .topP)

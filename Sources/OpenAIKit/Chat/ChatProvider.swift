@@ -31,7 +31,7 @@ public struct ChatProvider {
         logitBias: [String : Int] = [:],
         user: String? = nil
     ) async throws -> Chat {
-        
+    
         let request = try CreateChatRequest(
             model: model.id,
             messages: messages,
