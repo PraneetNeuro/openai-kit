@@ -36,7 +36,7 @@ public struct ChatMessage: Codable {
     public let content: String
     public let functionCall: FunctionCall?
     
-    init(role: Role, content: String) {
+    public init(role: Role, content: String) {
         self.role = role
         self.content = content
         self.functionCall = nil
